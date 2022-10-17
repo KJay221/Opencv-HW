@@ -25,6 +25,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.FindExtrinsic.clicked.connect(self.FunctionFindExtrinsic)
         self.FindDistortion.clicked.connect(self.FunctionFindDistortion)
         self.ShowResult.clicked.connect(self.FunctionShowResult)
+        self.SWOB.clicked.connect(lambda : self.FunctionSW("onbord"))
+        self.SWV.clicked.connect(lambda : self.FunctionSW("vertical"))
 
     # Load Image
     def browsedirectory(self):
@@ -43,11 +45,12 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
     # 1. function
     def FunctionFindCorners(self):
         for obj in self.Img_list:
-            cv2.drawChessboardCorners(obj[0], (11, 8), obj[1], True)
-            img_height, img_width = obj[0].shape[:2]
+            img = obj[0].copy()
+            cv2.drawChessboardCorners(img, (11, 8), obj[1], True)
+            img_height, img_width = img.shape[:2]
             img_height = int(img_height/ 3)
             img_width = int(img_width/ 3)
-            img = cv2.resize(obj[0], (img_height, img_width), interpolation=cv2.INTER_AREA)
+            img = cv2.resize(img, (img_height, img_width), interpolation=cv2.INTER_AREA)
             cv2.imshow(obj[2] ,img)
             cv2.waitKey(500)
             cv2.destroyAllWindows()
@@ -72,9 +75,10 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
 
     def FunctionShowResult(self):
         for obj in self.Img_list:
-            h,  w = obj[0].shape[:2]
+            img = obj[0].copy()
+            h,  w = img.shape[:2]
             newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist, (w,h), 1, (w,h))
-            dst = cv2.undistort(obj[0], self.mtx, self.dist, None, newcameramtx)
+            dst = cv2.undistort(img, self.mtx, self.dist, None, newcameramtx)
 
             img_height, img_width = dst.shape[:2]
             img_height = int(img_height/ 3)
@@ -82,17 +86,16 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
             dst = cv2.resize(dst, (img_height, img_width), interpolation=cv2.INTER_AREA)
             dst = cv2.cvtColor(dst,cv2.COLOR_BGR2RGB)
 
-            img_height, img_width = obj[0].shape[:2]
+            img_height, img_width = img.shape[:2]
             img_height = int(img_height/ 3)
             img_width = int(img_width/ 3)
-            img = cv2.resize(obj[0], (img_height, img_width), interpolation=cv2.INTER_AREA)
+            img = cv2.resize(img, (img_height, img_width), interpolation=cv2.INTER_AREA)
             img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
 
             show = np.concatenate([dst, img], axis = 1)
             cv2.imshow(obj[2], show)
-            cv2.waitKey(2000)
+            cv2.waitKey(500)
             cv2.destroyAllWindows()
-            
 
     def camera(self):
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -103,7 +106,9 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         objpoints = []
         imgpoints = []
         
-        folder = glob.glob(os.path.join(self.folder_path, "*"))
+        self.Img_list = []
+        folder = []
+        folder = glob.glob(os.path.join(self.folder_path, "*.bmp")) + glob.glob(os.path.join(self.folder_path, "*.png"))
         for obj in folder:
             filename = obj.split("/")[-1]
             img = cv2.imread(obj)
@@ -116,16 +121,69 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
                 imgpoints.append(corners)
                 self.Img_list.append([img, corners2, filename])
 
+        ret, self.mtx, self.dist, self.rvecs, self.tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
+        for i in range(len(self.Img_list)):
+            self.Img_list[i].append(self.rvecs[i])
+            self.Img_list[i].append(self.tvecs[i])
+
         # simple sort       
         def takeThird(elem):
             return elem[2]
         self.Img_list.sort(key = takeThird)
                 
         # comboBox item
+        self.comboBox.clear()
         for obj in self.Img_list:
             self.comboBox.addItem(obj[2])
 
-        ret, self.mtx, self.dist, self.rvecs, self.tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
+        
+    # 2. function
+    def FunctionSW(self, type):
+        if type == "onbord":
+            show = cv2.FileStorage('./Dataset_CvDl_Hw1/Q2_Image/Q2_lib/alphabet_lib_onboard.txt', cv2.FILE_STORAGE_READ)
+        else:
+            show = cv2.FileStorage('./Dataset_CvDl_Hw1/Q2_Image/Q2_lib/alphabet_lib_vertical.txt', cv2.FILE_STORAGE_READ)
+
+        for obj in self.Img_list:
+            img = obj[0].copy()
+            rvec = obj[3].copy()
+            tvec = obj[4].copy()
+        
+            def GenWord(m, n):
+                Word = show.getNode(m).mat()
+                xpost = (n % 3) * 3
+                ypost = int(n / 3) * 3
+
+                for i in Word:
+                    src = np.array(i, np.float64)
+                    src[0][0] += 7 - xpost
+                    src[0][1] += 5 - ypost
+                    src[1][0] += 7 - xpost
+                    src[1][1] += 5 - ypost
+                    cameraMatrix = self.mtx
+                    result = cv2.projectPoints(src, rvec, tvec, cameraMatrix, None)
+
+                    result = tuple(map(tuple, result[0]))
+                    start = tuple(map(int, result[0][0]))
+                    end = tuple(map(int, result[1][0]))
+                    cv2.line(img, start, end, (238, 75, 43), 5)
+            
+            text = str(self.lineEdit.text())
+            text = text.upper()
+            for i ,word in enumerate(text):
+                if(word.isalpha()):
+                    GenWord(word, i)
+
+            img_height, img_width = img.shape[:2]
+            img_height = int(img_height/ 3)
+            img_width = int(img_width/ 3)
+            img = cv2.resize(img, (img_height, img_width), interpolation=cv2.INTER_AREA)
+
+            img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+            cv2.imshow(obj[2], img)
+            cv2.waitKey(500)
+            cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
