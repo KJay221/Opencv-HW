@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 import UI
-import sys, os, pprint
+import sys, os
 import cv2
 import glob
 import numpy as np
@@ -24,6 +24,7 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.FindIntrinsic.clicked.connect(self.FunctionFindIntrinsic)
         self.FindExtrinsic.clicked.connect(self.FunctionFindExtrinsic)
         self.FindDistortion.clicked.connect(self.FunctionFindDistortion)
+        self.ShowResult.clicked.connect(self.FunctionShowResult)
 
     # Load Image
     def browsedirectory(self):
@@ -68,7 +69,31 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
     def FunctionFindDistortion(self):
         print("Distortion:")
         print(self.dist)
-        
+
+    def FunctionShowResult(self):
+        for obj in self.Img_list:
+            h,  w = obj[0].shape[:2]
+            newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist, (w,h), 1, (w,h))
+            dst = cv2.undistort(obj[0], self.mtx, self.dist, None, newcameramtx)
+
+            img_height, img_width = dst.shape[:2]
+            img_height = int(img_height/ 3)
+            img_width = int(img_width/ 3)
+            dst = cv2.resize(dst, (img_height, img_width), interpolation=cv2.INTER_AREA)
+            dst = cv2.cvtColor(dst,cv2.COLOR_BGR2RGB)
+
+            img_height, img_width = obj[0].shape[:2]
+            img_height = int(img_height/ 3)
+            img_width = int(img_width/ 3)
+            img = cv2.resize(obj[0], (img_height, img_width), interpolation=cv2.INTER_AREA)
+            img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+
+            show = np.concatenate([dst, img], axis = 1)
+            cv2.imshow(obj[2], show)
+            cv2.waitKey(2000)
+            cv2.destroyAllWindows()
+            
+
     def camera(self):
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
