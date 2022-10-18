@@ -27,6 +27,7 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.ShowResult.clicked.connect(self.FunctionShowResult)
         self.SWOB.clicked.connect(lambda : self.FunctionSW("onbord"))
         self.SWV.clicked.connect(lambda : self.FunctionSW("vertical"))
+        self.SDM.clicked.connect(self.FunctionSDM)
 
     # Load Image
     def browsedirectory(self):
@@ -140,9 +141,11 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
     # 2. function
     def FunctionSW(self, type):
         if type == "onbord":
-            show = cv2.FileStorage('./Dataset_CvDl_Hw1/Q2_Image/Q2_lib/alphabet_lib_onboard.txt', cv2.FILE_STORAGE_READ)
+            libpath = self.folder_path + '/Q2_lib/alphabet_lib_onboard.txt'
+            show = cv2.FileStorage(libpath, cv2.FILE_STORAGE_READ)
         else:
-            show = cv2.FileStorage('./Dataset_CvDl_Hw1/Q2_Image/Q2_lib/alphabet_lib_vertical.txt', cv2.FILE_STORAGE_READ)
+            libpath = self.folder_path + '/Q2_lib/alphabet_lib_vertical.txt'
+            show = cv2.FileStorage(libpath, cv2.FILE_STORAGE_READ)
 
         for obj in self.Img_list:
             img = obj[0].copy()
@@ -153,7 +156,6 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
                 Word = show.getNode(m).mat()
                 xpost = (n % 3) * 3
                 ypost = int(n / 3) * 3
-
                 for i in Word:
                     src = np.array(i, np.float64)
                     src[0][0] += 7 - xpost
@@ -166,7 +168,7 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
                     result = tuple(map(tuple, result[0]))
                     start = tuple(map(int, result[0][0]))
                     end = tuple(map(int, result[1][0]))
-                    cv2.line(img, start, end, (238, 75, 43), 5)
+                    cv2.line(img, start, end, (255, 0, 0), 5)
             
             text = str(self.lineEdit.text())
             text = text.upper()
@@ -183,6 +185,57 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
             cv2.imshow(obj[2], img)
             cv2.waitKey(500)
             cv2.destroyAllWindows()
+
+    # 3. function
+    def FunctionSDM(self):
+        imgL = cv2.imread(self.ImageL_path)
+        imgR = cv2.imread(self.ImageR_path)
+
+        def resize(img):
+            img_height, img_width = img.shape[:2]
+            img_height = img_height - img_height % 256
+            img_width = img_width - img_width % 256
+            img = cv2.resize(img, (img_height, img_width), interpolation=cv2.INTER_AREA)
+            return img
+        imgL = resize(imgL)
+        imgR = resize(imgR)
+
+        imgL_gray = cv2.cvtColor(imgL.copy(), cv2.COLOR_BGR2GRAY)
+        imgR_gray = cv2.cvtColor(imgR.copy(), cv2.COLOR_BGR2GRAY)
+        stereo = cv2.StereoBM_create(numDisparities=256, blockSize=25)
+        img = stereo.compute(imgL_gray, imgR_gray)
+        img = cv2.normalize(img, img, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+        img_height, img_width = img.shape[:2]
+        img_height = int(img_height/ 4)
+        img_width = int(img_width/ 4)
+        img = cv2.resize(img, (img_height, img_width), interpolation=cv2.INTER_AREA)
+        cv2.imshow("img", img)
+
+        # imgR
+        imgR = cv2.cvtColor(imgR, cv2.COLOR_BGR2RGB)
+        img_height, img_width = imgR.shape[:2]
+        img_height = int(img_height/ 4)
+        img_width = int(img_width/ 4)
+        imgRshow = cv2.resize(imgR, (img_height, img_width), interpolation=cv2.INTER_AREA)
+        cv2.imshow("imgR", imgRshow)
+        
+        # set mouse callback
+        def mouse_click(event, x, y, flags, param):
+            if event == cv2.EVENT_LBUTTONDOWN:
+                nonlocal imgRshow
+                imgRshow_circle = imgRshow.copy()
+                imgRshow_circle = cv2.circle(imgRshow_circle, (x, y), 3, (255, 0, 0), 10)
+                cv2.imshow("imgR", imgRshow_circle)
+        
+        # imgL
+        cv2.namedWindow('imgL')
+        cv2.setMouseCallback('imgL', mouse_click)
+        imgL = cv2.cvtColor(imgL, cv2.COLOR_BGR2RGB)
+        img_height, img_width = imgL.shape[:2]
+        img_height = int(img_height/ 4)
+        img_width = int(img_width/ 4)
+        imgLshow = cv2.resize(imgL, (img_height, img_width), interpolation=cv2.INTER_AREA)
+        cv2.imshow("imgL", imgLshow)
 
 
 if __name__ == '__main__':
