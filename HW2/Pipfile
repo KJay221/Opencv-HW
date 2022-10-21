@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pyqt5 = "*"
+opencv-python = "==3.4.2.17"
+opencv-contrib-python = "==3.4.2.17"
+numpy = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
+python_full_version = "3.7.15"
