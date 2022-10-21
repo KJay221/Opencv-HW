@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>989</width>
+    <width>510</width>
     <height>558</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>2022 CvDI Hw1</string>
+   <string>2022 CvDI Hw1_4&amp;5</string>
   </property>
   <widget class="QGroupBox" name="groupBox1">
    <property name="enabled">
@@ -26,7 +26,7 @@
     </rect>
    </property>
    <property name="title">
-    <string>Load Image</string>
+    <string>4. SIFT</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignJustify|Qt::AlignVCenter</set>
@@ -37,17 +37,17 @@
    <property name="checkable">
     <bool>false</bool>
    </property>
-   <widget class="QPushButton" name="LoadFolder">
+   <widget class="QPushButton" name="LoadImage1">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>90</y>
-      <width>181</width>
+      <x>10</x>
+      <y>60</y>
+      <width>201</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Load Folder</string>
+     <string>LoadImage1</string>
     </property>
     <property name="autoDefault">
      <bool>false</bool>
@@ -56,17 +56,17 @@
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="LoadImageL">
+   <widget class="QPushButton" name="LoadImage2">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>190</y>
-      <width>181</width>
+      <x>10</x>
+      <y>150</y>
+      <width>201</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Load Image_L</string>
+     <string>LoadImage2</string>
     </property>
     <property name="autoDefault">
      <bool>false</bool>
@@ -75,17 +75,36 @@
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="LoadImageR">
+   <widget class="QPushButton" name="Keypoints">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>300</y>
-      <width>181</width>
+      <x>10</x>
+      <y>240</y>
+      <width>201</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Load Image_R</string>
+     <string>4.1 Keypoints</string>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="MK">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>330</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>4.2 Matched Keypoints</string>
     </property>
     <property name="autoDefault">
      <bool>false</bool>
@@ -108,7 +127,7 @@
     </rect>
    </property>
    <property name="title">
-    <string>1. Calibration</string>
+    <string>5. IMG DL part</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignJustify|Qt::AlignVCenter</set>
@@ -119,103 +138,74 @@
    <property name="checkable">
     <bool>false</bool>
    </property>
-   <widget class="QPushButton" name="FindCorners">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>40</y>
-      <width>181</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>1.1 Find Corners</string>
-    </property>
-    <property name="autoDefault">
-     <bool>false</bool>
-    </property>
-    <property name="default">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="FindIntrinsic">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>100</y>
-      <width>181</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>1.2 Find Intrinsic</string>
-    </property>
-    <property name="autoDefault">
-     <bool>false</bool>
-    </property>
-    <property name="default">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_5">
+   <widget class="QPushButton" name="LoadImage">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>150</y>
+      <y>50</y>
       <width>201</width>
-      <height>121</height>
+      <height>41</height>
      </rect>
     </property>
-    <property name="title">
-     <string>1.3 Find Extrinsic</string>
+    <property name="text">
+     <string>Load Image</string>
     </property>
-    <widget class="QComboBox" name="comboBox">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>30</y>
-       <width>121</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="currentText">
-      <string/>
-     </property>
-     <property name="currentIndex">
-      <number>-1</number>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="FindExtrinsic">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>70</y>
-       <width>181</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>1.3 Find Extrinsic</string>
-     </property>
-     <property name="autoDefault">
-      <bool>false</bool>
-     </property>
-     <property name="default">
-      <bool>false</bool>
-     </property>
-    </widget>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
    </widget>
-   <widget class="QPushButton" name="FindDistortion">
+   <widget class="QPushButton" name="STI">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
+      <y>110</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1. Show Train Images</string>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="SDA">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>230</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>3. Show Data Augmentation</string>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="SAAL">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
       <y>290</y>
-      <width>181</width>
+      <width>201</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>1.4 Find Distortion </string>
+     <string>4. Show Accuracy and Loss</string>
     </property>
     <property name="autoDefault">
      <bool>false</bool>
@@ -224,137 +214,36 @@
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="ShowResult">
+   <widget class="QPushButton" name="SMS">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
+      <y>170</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>2. Show Model Structure</string>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Inference">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
       <y>350</y>
-      <width>181</width>
+      <width>201</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Show Result</string>
-    </property>
-    <property name="autoDefault">
-     <bool>false</bool>
-    </property>
-    <property name="default">
-     <bool>false</bool>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QGroupBox" name="groupBox_3">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>510</x>
-     <y>70</y>
-     <width>221</width>
-     <height>411</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>2. Augmented Reality</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignJustify|Qt::AlignVCenter</set>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <widget class="QPushButton" name="SWOB">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>190</y>
-      <width>181</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>2.1 Show Words on Board</string>
-    </property>
-    <property name="autoDefault">
-     <bool>false</bool>
-    </property>
-    <property name="default">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="SWV">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>280</y>
-      <width>181</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>2.2 Show Words Vertically</string>
-    </property>
-    <property name="autoDefault">
-     <bool>false</bool>
-    </property>
-    <property name="default">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="lineEdit">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>90</y>
-      <width>181</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QGroupBox" name="groupBox_4">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>750</x>
-     <y>70</y>
-     <width>221</width>
-     <height>411</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>3. Stereo Disparity Map</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignJustify|Qt::AlignVCenter</set>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <widget class="QPushButton" name="SDM">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>190</y>
-      <width>181</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>3.1 Stereo Disparity Map</string>
+     <string>5. Inference</string>
     </property>
     <property name="autoDefault">
      <bool>false</bool>
