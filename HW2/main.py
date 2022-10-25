@@ -2,11 +2,13 @@ from PyQt5 import QtWidgets
 import UI
 import sys
 import cv2
+import pickle
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Window(QtWidgets.QWidget, UI.Ui_Form):
-    # declare path
-    Image1_path = ''
-    Image2 = ''
+    classes = ('plane', 'car', 'bird', 'cat',
+                 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
     def __init__(self):
         super(Window, self).__init__()
@@ -15,6 +17,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.LoadImage2.clicked.connect(self.FunctionLoadImage2)
         self.Keypoints.clicked.connect(self.FunctionKeypoints)
         self.MK.clicked.connect(self.FunctionMK)
+        self.LoadImage.clicked.connect(self.FunctionLoadImage)
+        self.STI.clicked.connect(self.FunctionSTI)
 
     def FunctionLoadImage1(self):
         path = QtWidgets.QFileDialog.getOpenFileName()
@@ -71,6 +75,27 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         showimg = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, **draw_params)
         cv2.imshow("img", showimg)
 
+    def FunctionLoadImage(self):
+        path = QtWidgets.QFileDialog.getOpenFileName()
+        with open(path[0], 'rb') as file:
+            self.train_dataset = pickle.load(file, encoding='bytes')
+
+    def FunctionSTI(self):
+        img = self.train_dataset[b'data'][0:9]
+        labels = self.train_dataset[b'labels'][0:9]
+        for i in range(9):
+            img_flat = img[i]
+            img_R = img_flat[0:1024].reshape((32, 32))
+            img_G = img_flat[1024:2048].reshape((32, 32))
+            img_B = img_flat[2048:3072].reshape((32, 32))
+            imgs = np.dstack((img_R, img_G, img_B))
+            plt.subplot(3, 3, i + 1)
+            plt.xticks([])
+            plt.yticks([])
+            plt.title(self.classes[labels[i]])
+            plt.imshow(imgs)
+
+        plt.show()
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
