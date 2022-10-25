@@ -7,8 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class Window(QtWidgets.QWidget, UI.Ui_Form):
-    classes = ('plane', 'car', 'bird', 'cat',
-                 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+    classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
     def __init__(self):
         super(Window, self).__init__()
@@ -76,25 +75,25 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         cv2.imshow("img", showimg)
 
     def FunctionLoadImage(self):
+        self.train_img = []
         path = QtWidgets.QFileDialog.getOpenFileName()
         with open(path[0], 'rb') as file:
-            self.train_dataset = pickle.load(file, encoding='bytes')
+            train_dataset = pickle.load(file, encoding='bytes')
+        self.labels = train_dataset[b'labels']
+        for img_row in train_dataset[b'data']:
+            img_R = img_row[0:1024].reshape((32, 32))
+            img_G = img_row[1024:2048].reshape((32, 32))
+            img_B = img_row[2048:3072].reshape((32, 32))
+            img = np.dstack((img_R, img_G, img_B))
+            self.train_img.append(img)
 
     def FunctionSTI(self):
-        img = self.train_dataset[b'data'][0:9]
-        labels = self.train_dataset[b'labels'][0:9]
         for i in range(9):
-            img_flat = img[i]
-            img_R = img_flat[0:1024].reshape((32, 32))
-            img_G = img_flat[1024:2048].reshape((32, 32))
-            img_B = img_flat[2048:3072].reshape((32, 32))
-            imgs = np.dstack((img_R, img_G, img_B))
             plt.subplot(3, 3, i + 1)
             plt.xticks([])
             plt.yticks([])
-            plt.title(self.classes[labels[i]])
-            plt.imshow(imgs)
-
+            plt.title(self.classes[self.labels[i]])
+            plt.imshow(self.train_img[i])
         plt.show()
 
 if __name__ == '__main__':
