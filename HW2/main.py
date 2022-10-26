@@ -1,13 +1,20 @@
-from PyQt5 import QtWidgets
 import UI
 import sys
 import cv2
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
+import tensorflow as tf
+from PyQt5 import QtWidgets
+from keras import optimizers
+from keras.utils import np_utils
+from keras.datasets import cifar10
+from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout
 
 class Window(QtWidgets.QWidget, UI.Ui_Form):
     classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    demo = False
+    VGG19 = tf.keras.applications.VGG19(include_top = False, input_shape = (32, 32, 3), classes = 10)
 
     def __init__(self):
         super(Window, self).__init__()
@@ -18,6 +25,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.MK.clicked.connect(self.FunctionMK)
         self.LoadImage.clicked.connect(self.FunctionLoadImage)
         self.STI.clicked.connect(self.FunctionSTI)
+        self.SMS.clicked.connect(self.FunctionSMS)
+
 
     def FunctionLoadImage1(self):
         path = QtWidgets.QFileDialog.getOpenFileName()
@@ -76,25 +85,63 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
 
     def FunctionLoadImage(self):
         self.train_img = []
-        path = QtWidgets.QFileDialog.getOpenFileName()
-        with open(path[0], 'rb') as file:
+        with open('./cifar-10-python/cifar-10-batches-py/data_batch_1', 'rb') as file:
             train_dataset = pickle.load(file, encoding='bytes')
-        self.labels = train_dataset[b'labels']
         for img_row in train_dataset[b'data']:
             img_R = img_row[0:1024].reshape((32, 32))
             img_G = img_row[1024:2048].reshape((32, 32))
             img_B = img_row[2048:3072].reshape((32, 32))
             img = np.dstack((img_R, img_G, img_B))
             self.train_img.append(img)
+        self.train_img = np.array(self.train_img)
+        self.train_label = np.array(train_dataset[b'labels'])
 
     def FunctionSTI(self):
         for i in range(9):
             plt.subplot(3, 3, i + 1)
             plt.xticks([])
             plt.yticks([])
-            plt.title(self.classes[self.labels[i]])
+            plt.title(self.classes[self.train_label[i]])
             plt.imshow(self.train_img[i])
         plt.show()
+
+    def FunctionSMS(self):
+        if self.demo == False:
+            (trainX, self.trainY), (testX, testY) = cifar10.load_data()
+            self.x_train = trainX.astype('float32')/255
+            self.x_test = testX.astype('float32')/255
+            self.y_train = np_utils.to_categorical(self.trainY)
+            self.y_test = np_utils.to_categorical(testY)
+            model=tf.keras.models.Sequential()
+            model.add(self.VGG19)
+            model.add(Flatten())
+            model.add(Dense(1024,activation = 'relu'))
+            model.add(Dropout(.25))
+            model.add(Dense(1024,activation = 'relu'))
+            model.add(Dropout(.25))
+            model.add(Dense(256,activation = 'relu'))
+            model.add(Dense(10,activation = 'softmax'))
+            optimizer = optimizers.SGD(lr = 0.01, decay = 1e-6, momentum = 0.9, nesterov = True)
+            
+            model.compile(optimizer, loss = 'categorical_crossentropy', metrics = ['accuracy'])
+            train_history = model.fit(x = self.x_train, y = self.y_train, epochs = 30, batch_size = 32, verbose = 1)
+        else:
+            print(1)
+        print(self.VGG19.summary())
+
+    def f(self):
+        self.test_img = []
+        with open('./cifar-10-python/cifar-10-batches-py/test_batch', 'rb') as file:
+            test_dataset = pickle.load(file, encoding='bytes')
+        self.test_labels = test_dataset[b'labels']
+        for img_row in test_dataset[b'data']:
+            img_R = img_row[0:1024].reshape((32, 32))
+            img_G = img_row[1024:2048].reshape((32, 32))
+            img_B = img_row[2048:3072].reshape((32, 32))
+            img = np.dstack((img_R, img_G, img_B))
+            self.test_img.append(img)
+        
+        
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
