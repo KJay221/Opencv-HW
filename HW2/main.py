@@ -7,14 +7,12 @@ import numpy as np
 import tensorflow as tf
 from PyQt5 import QtWidgets
 from keras import optimizers
-from keras.utils import np_utils
-from keras.datasets import cifar10
-from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout
+from keras.layers import Dense, Flatten, Dropout
 
 class Window(QtWidgets.QWidget, UI.Ui_Form):
     classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
     demo = False
-    VGG19 = tf.keras.applications.VGG19(include_top = False, input_shape = (32, 32, 3), classes = 10)
+    
 
     def __init__(self):
         super(Window, self).__init__()
@@ -26,6 +24,31 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.LoadImage.clicked.connect(self.FunctionLoadImage)
         self.STI.clicked.connect(self.FunctionSTI)
         self.SMS.clicked.connect(self.FunctionSMS)
+
+        # load train data
+        self.train_img = []
+        with open('./cifar-10-python/cifar-10-batches-py/data_batch_1', 'rb') as file:
+            train_dataset = pickle.load(file, encoding='bytes')
+        for img_row in train_dataset[b'data']:
+            img_R = img_row[0:1024].reshape((32, 32))
+            img_G = img_row[1024:2048].reshape((32, 32))
+            img_B = img_row[2048:3072].reshape((32, 32))
+            img = np.dstack((img_R, img_G, img_B))
+            self.train_img.append(img)
+        self.train_img = np.array(self.train_img)
+        self.train_label = np.array(train_dataset[b'labels'])
+        
+        # load test data
+        self.test_img = []
+        with open('./cifar-10-python/cifar-10-batches-py/test_batch', 'rb') as file:
+            test_dataset = pickle.load(file, encoding='bytes')
+        self.test_labels = test_dataset[b'labels']
+        for img_row in test_dataset[b'data']:
+            img_R = img_row[0:1024].reshape((32, 32))
+            img_G = img_row[1024:2048].reshape((32, 32))
+            img_B = img_row[2048:3072].reshape((32, 32))
+            img = np.dstack((img_R, img_G, img_B))
+            self.test_img.append(img)
 
 
     def FunctionLoadImage1(self):
@@ -84,18 +107,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         cv2.imshow("img", showimg)
 
     def FunctionLoadImage(self):
-        self.train_img = []
-        with open('./cifar-10-python/cifar-10-batches-py/data_batch_1', 'rb') as file:
-            train_dataset = pickle.load(file, encoding='bytes')
-        for img_row in train_dataset[b'data']:
-            img_R = img_row[0:1024].reshape((32, 32))
-            img_G = img_row[1024:2048].reshape((32, 32))
-            img_B = img_row[2048:3072].reshape((32, 32))
-            img = np.dstack((img_R, img_G, img_B))
-            self.train_img.append(img)
-        self.train_img = np.array(self.train_img)
-        self.train_label = np.array(train_dataset[b'labels'])
-
+        print(1)
+        
     def FunctionSTI(self):
         for i in range(9):
             plt.subplot(3, 3, i + 1)
@@ -107,13 +120,10 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
 
     def FunctionSMS(self):
         if self.demo == False:
-            (trainX, self.trainY), (testX, testY) = cifar10.load_data()
-            self.x_train = trainX.astype('float32')/255
-            self.x_test = testX.astype('float32')/255
-            self.y_train = np_utils.to_categorical(self.trainY)
-            self.y_test = np_utils.to_categorical(testY)
-            model=tf.keras.models.Sequential()
-            model.add(self.VGG19)
+            VGG19 = tf.keras.applications.VGG19(
+                include_top = False, input_shape = (32, 32, 3), classes = 10)
+            model = tf.keras.models.Sequential()
+            model.add(VGG19)
             model.add(Flatten())
             model.add(Dense(1024,activation = 'relu'))
             model.add(Dropout(.25))
@@ -122,24 +132,19 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
             model.add(Dense(256,activation = 'relu'))
             model.add(Dense(10,activation = 'softmax'))
             optimizer = optimizers.SGD(lr = 0.01, decay = 1e-6, momentum = 0.9, nesterov = True)
-            
+            label = tf.cast(self.train_label, dtype=tf.int32)
+            label = tf.squeeze(label)
+            label = tf.one_hot(label, depth=10)
             model.compile(optimizer, loss = 'categorical_crossentropy', metrics = ['accuracy'])
-            train_history = model.fit(x = self.x_train, y = self.y_train, epochs = 30, batch_size = 32, verbose = 1)
+            train_history = model.fit(
+                x = self.train_img, y = label, epochs = 30, batch_size = 32, verbose = 1)
+            self.model.save('./model/model.h5')
         else:
             print(1)
-        print(self.VGG19.summary())
+        print(model.summary())
 
     def f(self):
-        self.test_img = []
-        with open('./cifar-10-python/cifar-10-batches-py/test_batch', 'rb') as file:
-            test_dataset = pickle.load(file, encoding='bytes')
-        self.test_labels = test_dataset[b'labels']
-        for img_row in test_dataset[b'data']:
-            img_R = img_row[0:1024].reshape((32, 32))
-            img_G = img_row[1024:2048].reshape((32, 32))
-            img_B = img_row[2048:3072].reshape((32, 32))
-            img = np.dstack((img_R, img_G, img_B))
-            self.test_img.append(img)
+        print(1)        
         
         
 
