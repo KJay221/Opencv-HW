@@ -17,6 +17,7 @@ from keras.callbacks import ReduceLROnPlateau
 class Window(QtWidgets.QWidget, UI.Ui_Form):
     classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
     demo = False
+    learning_rate = 0.01
     
 
     def __init__(self):
@@ -35,6 +36,10 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.x_test = testX.astype('float32')/255
         self.y_train = np_utils.to_categorical(self.trainY)
         self.y_test = np_utils.to_categorical(testY)
+
+        # reduce size
+        self.x_train = self.x_train[0:100]
+        self.y_train = self.y_train[0:100]
 
 
     def FunctionLoadImage1(self):
@@ -119,13 +124,32 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
             model.add(Dense(256,activation = 'relu'))
             model.add(Dense(10,activation = 'softmax'))
 
-            optimizer = optimizers.SGD(learning_rate = 0.0001, decay=1e-6, momentum=0.9, nesterov=True)
+            optimizer = optimizers.SGD(learning_rate = self.learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
             model.compile(optimizer = optimizer, loss = 'categorical_crossentropy', metrics = ['accuracy'])
             learning_rate_reduction = ReduceLROnPlateau(monitor='val_accuracy', 
                 patience=3, verbose=1, factor=0.6, min_lr=0.00001)
             result = model.fit(
                 x = self.x_train, y = self.y_train, epochs = 30, batch_size = 32, validation_split=0.15, verbose = 1, callbacks = [learning_rate_reduction])
             model.save('model.h5')
+            plt.plot(result.history['accuracy'])
+            plt.plot(result.history['val_accuracy'])
+            plt.title('model accuracy')
+            plt.ylabel('accuracy')
+            plt.xlabel('epoch')
+            plt.legend(['train', 'test'], loc='upper left') 
+            plt.show()
+            plt.savefig('accuracy.png')   
+            plt.close()
+
+            plt.plot(result.history['loss']) 
+            plt.plot(result.history['val_loss']) 
+            plt.title('model loss')
+            plt.ylabel('loss')
+            plt.xlabel('epoch')
+            plt.legend(['train', 'test'], loc='upper left') 
+            plt.show()
+            plt.savefig('loss.png')
+            plt.close()
         else:
             print(1)
         print(model.summary())
