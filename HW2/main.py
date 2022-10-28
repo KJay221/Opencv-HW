@@ -1,8 +1,8 @@
 import random
-from unittest import result
 import UI
 import sys
 import cv2
+import keras
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -16,13 +16,15 @@ from keras.callbacks import ReduceLROnPlateau
 
 class Window(QtWidgets.QWidget, UI.Ui_Form):
     classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-    demo = False
+    demo = True
     learning_rate = 0.01
-    
+    epochs = 30
 
     def __init__(self):
         super(Window, self).__init__()
         self.setupUi(self)
+
+        # button connect function
         self.LoadImage1.clicked.connect(self.FunctionLoadImage1)
         self.LoadImage2.clicked.connect(self.FunctionLoadImage2)
         self.Keypoints.clicked.connect(self.FunctionKeypoints)
@@ -30,7 +32,9 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.LoadImage.clicked.connect(self.FunctionLoadImage)
         self.STI.clicked.connect(self.FunctionSTI)
         self.SMS.clicked.connect(self.FunctionSMS)
+        self.Inference.clicked.connect(self.FunctionInference)
 
+        # load data
         (self.trainX, self.trainY), (testX, testY) = cifar10.load_data()
         self.x_train = self.trainX.astype('float32')/255
         self.x_test = testX.astype('float32')/255
@@ -38,8 +42,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.y_test = np_utils.to_categorical(testY)
 
         # reduce size
-        self.x_train = self.x_train[0:100]
-        self.y_train = self.y_train[0:100]
+        self.x_train = self.x_train[0:1000]
+        self.y_train = self.y_train[0:1000]
 
 
     def FunctionLoadImage1(self):
@@ -114,31 +118,30 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         if self.demo == False:
             VGG19 = tf.keras.applications.VGG19(
                 include_top = False, input_shape = (32, 32, 3), classes = 10)
-            model = tf.keras.models.Sequential()
-            model.add(VGG19)
-            model.add(Flatten())
-            model.add(Dense(1024,activation = 'relu'))
-            model.add(Dropout(.25))
-            model.add(Dense(1024,activation = 'relu'))
-            model.add(Dropout(.25))
-            model.add(Dense(256,activation = 'relu'))
-            model.add(Dense(10,activation = 'softmax'))
+            self.model = tf.keras.models.Sequential()
+            self.model.add(VGG19)
+            self.model.add(Flatten())
+            self.model.add(Dense(1024,activation = 'relu'))
+            self.model.add(Dropout(.25))
+            self.model.add(Dense(1024,activation = 'relu'))
+            self.model.add(Dropout(.25))
+            self.model.add(Dense(256,activation = 'relu'))
+            self.model.add(Dense(10,activation = 'softmax'))
 
             optimizer = optimizers.SGD(learning_rate = self.learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
-            model.compile(optimizer = optimizer, loss = 'categorical_crossentropy', metrics = ['accuracy'])
+            self.model.compile(optimizer = optimizer, loss = 'categorical_crossentropy', metrics = ['accuracy'])
             learning_rate_reduction = ReduceLROnPlateau(monitor='val_accuracy', 
                 patience=3, verbose=1, factor=0.6, min_lr=0.00001)
-            result = model.fit(
-                x = self.x_train, y = self.y_train, epochs = 30, batch_size = 32, validation_split=0.15, verbose = 1, callbacks = [learning_rate_reduction])
-            model.save('model.h5')
+            result = self.model.fit(
+                x = self.x_train, y = self.y_train, epochs = self.epochs, batch_size = 32, validation_split=0.15, verbose = 1, callbacks = [learning_rate_reduction])
+            self.model.save('./model/model.h5')
             plt.plot(result.history['accuracy'])
             plt.plot(result.history['val_accuracy'])
             plt.title('model accuracy')
             plt.ylabel('accuracy')
             plt.xlabel('epoch')
             plt.legend(['train', 'test'], loc='upper left') 
-            plt.show()
-            plt.savefig('accuracy.png')   
+            plt.savefig('./pic/accuracy.png')   
             plt.close()
 
             plt.plot(result.history['loss']) 
@@ -147,15 +150,30 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
             plt.ylabel('loss')
             plt.xlabel('epoch')
             plt.legend(['train', 'test'], loc='upper left') 
-            plt.show()
-            plt.savefig('loss.png')
+            plt.savefig('./pic/loss.png')
             plt.close()
         else:
-            print(1)
-        print(model.summary())
+            self.model = keras.models.load_model('./model/model.h5')
+        print(self.model.summary())
 
-    def f(self):
-        print(1)        
+    def FunctionInference(self):
+        img = np.array([self.x_test[5]])
+        tag = []
+        for i in range(10):
+            tag.append(self.classes[i])
+        tag[0] = 'plane'
+        tag[1] = 'car'
+        pred = self.model.predict(img)
+        #print(pred[0])
+
+        fig = plt.figure()
+        fig.set_size_inches(12, 6)
+        plt.subplot(1, 2, 1)
+        plt.imshow(img[0])
+        plt.axis('off')
+        plt.subplot(1, 2, 2)
+        plt.bar(tag, pred[0])
+        plt.show()       
         
         
 
