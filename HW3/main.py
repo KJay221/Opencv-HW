@@ -3,6 +3,7 @@ import UI
 import sys, os
 import cv2
 import keras
+import PIL
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -13,6 +14,7 @@ from keras.layers import Dense, Flatten, Dropout
 from keras.datasets import cifar10
 from keras.utils import np_utils
 from keras.callbacks import ReduceLROnPlateau
+from torchvision import transforms
 
 
 class Window(QtWidgets.QWidget, UI.Ui_Form):
@@ -86,8 +88,9 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
 
     def FunctionLoadImage(self):
         self.test_number = random.randint(0, 9999)
+        img_show = cv2.cvtColor(self.testX[self.test_number], cv2.COLOR_BGR2RGB)
         img_path = './pic/' + str(self.test_number) + '.png'
-        cv2.imwrite(img_path, self.testX[self.test_number])
+        cv2.imwrite(img_path, img_show)
         pix = QPixmap(img_path)
         pix = pix.scaled(315,315)
         item = QtWidgets.QGraphicsPixmapItem(pix)
@@ -112,7 +115,32 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         print(self.model.summary())
 
     def FunctionSDA(self):
-        print(1)
+        img_path = './pic/' + str(self.test_number) + '.png'
+        cv2.imwrite(img_path, self.testX[self.test_number])
+        img_pil = PIL.Image.open(img_path, mode = 'r')
+        img_pil = img_pil.convert('RGBA')
+
+        # RandomRotation
+        transform = transforms.Compose([transforms.RandomRotation(degrees = 90)])
+        img_RandomRotation = transform(img_pil)
+        img_RandomRotation = np.array(img_RandomRotation)
+        img_RandomRotation = cv2.resize(img_RandomRotation, (320, 320))
+
+        # RandomResizedCrop
+        transform = transforms.Compose([transforms.RandomResizedCrop(size = 224, scale = (0.5, 0.5))])
+        img_RandomResizedCrop = transform(img_pil)
+        img_RandomResizedCrop = np.array(img_RandomResizedCrop)
+        img_RandomResizedCrop = cv2.resize(img_RandomResizedCrop, (320, 320))
+
+        # RandomHorizontalFlip
+        transform = transforms.Compose([transforms.RandomHorizontalFlip(p = 1)])
+        img_RandomHorizontalFlip = transform(img_pil)
+        img_RandomHorizontalFlip = np.array(img_RandomHorizontalFlip)
+        img_RandomHorizontalFlip = cv2.resize(img_RandomHorizontalFlip, (320, 320))
+
+        img_show = np.concatenate((img_RandomRotation, img_RandomResizedCrop, img_RandomHorizontalFlip), axis = 1)
+        cv2.imshow('img', img_show)
+        os.remove(img_path)
 
     def FunctionSAAL(self):
         cv2.imshow('Accuracy' ,cv2.imread('./pic/accuracy.png'))

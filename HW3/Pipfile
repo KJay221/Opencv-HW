@@ -10,6 +10,7 @@ opencv-contrib-python = "==3.4.2.17"
 numpy = "*"
 matplotlib = "==3.1.1"
 tensorflow = "*"
+torchvision = "*"
 
 [dev-packages]
 
