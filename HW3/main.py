@@ -28,6 +28,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.LoadImage.clicked.connect(self.FunctionLoadImage)
         self.STI.clicked.connect(self.FunctionSTI)
         self.SMS.clicked.connect(self.FunctionSMS)
+        self.SDA.clicked.connect(self.FunctionSDA)
+        self.SAAL.clicked.connect(self.FunctionSAAL)
         self.Inference.clicked.connect(self.FunctionInference)
 
         # combo box
@@ -108,6 +110,13 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
 
     def FunctionSMS(self):
         print(self.model.summary())
+
+    def FunctionSDA(self):
+        print(1)
+
+    def FunctionSAAL(self):
+        cv2.imshow('Accuracy' ,cv2.imread('./pic/accuracy.png'))
+        cv2.imshow('Loss' ,cv2.imread('./pic/loss.png'))
 
     def FunctionInference(self):
         img = np.array([self.x_test[self.test_number]])
