@@ -52,26 +52,26 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
             self.model = tf.keras.models.Sequential()
             self.model.add(VGG19)
             self.model.add(Flatten())
-            self.model.add(Dense(1024,activation = 'relu'))
+            self.model.add(Dense(1024, activation = 'relu'))
             self.model.add(Dropout(.25))
-            self.model.add(Dense(1024,activation = 'relu'))
+            self.model.add(Dense(1024, activation = 'relu'))
             self.model.add(Dropout(.25))
-            self.model.add(Dense(256,activation = 'relu'))
-            self.model.add(Dense(10,activation = 'softmax'))
+            self.model.add(Dense(256, activation = 'relu'))
+            self.model.add(Dense(10, activation = 'softmax'))
 
-            optimizer = optimizers.SGD(learning_rate = self.learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
+            optimizer = optimizers.SGD(learning_rate = self.learning_rate, decay = 1e-6, momentum = 0.9, nesterov = True)
             self.model.compile(optimizer = optimizer, loss = 'categorical_crossentropy', metrics = ['accuracy'])
-            learning_rate_reduction = ReduceLROnPlateau(monitor='val_accuracy', 
-                patience=3, verbose=1, factor=0.6, min_lr=0.00001)
+            learning_rate_reduction = ReduceLROnPlateau(monitor = 'val_accuracy', 
+                patience = 3, verbose = 1, factor = 0.6, min_lr = 0.00001)
             result = self.model.fit(
-                x = self.x_train, y = self.y_train, epochs = self.epochs, batch_size = 32, validation_split=0.15, verbose = 1, callbacks = [learning_rate_reduction])
+                x = self.x_train, y = self.y_train, epochs = self.epochs, batch_size = 32, validation_split = 0.15, verbose = 1, callbacks = [learning_rate_reduction])
             self.model.save('./model/model.h5')
             plt.plot(result.history['accuracy'])
             plt.plot(result.history['val_accuracy'])
             plt.title('model accuracy')
             plt.ylabel('accuracy')
             plt.xlabel('epoch')
-            plt.legend(['train', 'test'], loc='upper left') 
+            plt.legend(['train', 'test'], loc='upper left')
             plt.savefig('./pic/accuracy.png')   
             plt.close()
 
@@ -143,8 +143,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         os.remove(img_path)
 
     def FunctionSAAL(self):
-        cv2.imshow('Accuracy' ,cv2.imread('./pic/accuracy.png'))
-        cv2.imshow('Loss' ,cv2.imread('./pic/loss.png'))
+        img_show = np.concatenate((cv2.imread('./pic/accuracy.png'), cv2.imread('./pic/loss.png')), axis = 1)
+        cv2.imshow('img', img_show)
 
     def FunctionInference(self):
         img = np.array([self.x_test[self.test_number]])
