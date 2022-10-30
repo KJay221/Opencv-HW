@@ -17,7 +17,7 @@ from keras.callbacks import ReduceLROnPlateau
 
 class Window(QtWidgets.QWidget, UI.Ui_Form):
     classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-    demo = True
+    demo = False
     learning_rate = 0.01
     epochs = 30
 
@@ -114,6 +114,7 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         scene.addItem(item)
         self.Image.setScene(scene)
         os.remove(img_path)
+        self.Label.setText('Label = ' + self.classes[self.testY[number][0]])
         
     def FunctionSTI(self):
         number = random.randint(0, 49991)
