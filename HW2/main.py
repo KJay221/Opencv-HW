@@ -1,11 +1,12 @@
 import random
 import UI
-import sys
+import sys, os
 import cv2
 import keras
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+from PyQt5.QtGui import QPixmap
 from PyQt5 import QtWidgets
 from keras import optimizers
 from keras.layers import Dense, Flatten, Dropout
@@ -35,15 +36,15 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.Inference.clicked.connect(self.FunctionInference)
 
         # load data
-        (self.trainX, self.trainY), (testX, testY) = cifar10.load_data()
+        (self.trainX, self.trainY), (self.testX, self.testY) = cifar10.load_data()
         self.x_train = self.trainX.astype('float32')/255
-        self.x_test = testX.astype('float32')/255
+        self.x_test = self.testX.astype('float32')/255
         self.y_train = np_utils.to_categorical(self.trainY)
-        self.y_test = np_utils.to_categorical(testY)
+        self.y_test = np_utils.to_categorical(self.testY)
 
         # reduce size
-        self.x_train = self.x_train[0:1000]
-        self.y_train = self.y_train[0:1000]
+        # self.x_train = self.x_train[0:1000]
+        # self.y_train = self.y_train[0:1000]
 
 
     def FunctionLoadImage1(self):
@@ -102,10 +103,20 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         cv2.imshow("img", showimg)
 
     def FunctionLoadImage(self):
-        print(1)
+        number = random.randint(0, 9999)
+        img_path = './pic/' + str(number) + '.png'
+        cv2.imwrite(img_path, self.testX[number])
+        pix = QPixmap(img_path)
+        pix = pix.scaled(315,315)
+        item = QtWidgets.QGraphicsPixmapItem(pix)
+        scene = QtWidgets.QGraphicsScene(self)
+        scene.setSceneRect(0, 0, 315, 315)  
+        scene.addItem(item)
+        self.Image.setScene(scene)
+        os.remove(img_path)
         
     def FunctionSTI(self):
-        number = random.randint(0,49991)
+        number = random.randint(0, 49991)
         for i in range(9):
             plt.subplot(3, 3, i + 1)
             plt.xticks([])
@@ -174,7 +185,7 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         plt.subplot(1, 2, 2)
         plt.bar(tag, pred[0])
         plt.show()       
-        
+
         
 
 if __name__ == '__main__':
