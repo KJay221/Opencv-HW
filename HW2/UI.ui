@@ -268,7 +268,7 @@
     <rect>
      <x>530</x>
      <y>20</y>
-     <width>200</width>
+     <width>211</width>
      <height>30</height>
     </rect>
    </property>
@@ -281,7 +281,7 @@
     <rect>
      <x>530</x>
      <y>50</y>
-     <width>200</width>
+     <width>331</width>
      <height>30</height>
     </rect>
    </property>
@@ -294,12 +294,22 @@
     <rect>
      <x>530</x>
      <y>80</y>
-     <width>200</width>
+     <width>331</width>
      <height>30</height>
     </rect>
    </property>
    <property name="text">
     <string>Label = </string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="Demo">
+   <property name="geometry">
+    <rect>
+     <x>760</x>
+     <y>20</y>
+     <width>101</width>
+     <height>25</height>
+    </rect>
    </property>
   </widget>
  </widget>
