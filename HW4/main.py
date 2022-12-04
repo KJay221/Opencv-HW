@@ -1,6 +1,7 @@
 import sys
 import UI
 import cv2
+import cv2.aruco as aruco
 import numpy as np
 from PyQt5 import QtWidgets
 
@@ -33,6 +34,7 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.BS.clicked.connect(self.FunctionBS)
         self.Preprocessing.clicked.connect(self.FunctionPreprocessing)
         self.VideoTracking.clicked.connect(self.FunctionVideoTracking)
+        self.PT.clicked.connect(self.FunctionPT)
 
     def FunctionLoadVideo(self):
         path = QtWidgets.QFileDialog.getOpenFileName()
@@ -41,7 +43,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.label_vedio.setText("Video loaded")
 
     def FunctionLoadImage(self):
-        print(2)
+        path = QtWidgets.QFileDialog.getOpenFileName()
+        self.image_path = path[0]
         self.label_image.setText("Image loaded")
 
     def FunctionLoadFolder(self):
@@ -98,9 +101,9 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
 
     def FunctionVideoTracking(self):
         lk_params = dict(
-                winSize = (15,15),
-                maxLevel = 2,
-                criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+            winSize = (15,15),
+            maxLevel = 2,
+            criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
 
         ret, frame = self.video.read()
         gray_origin = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -133,6 +136,51 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
             cv2.waitKey(int(1000/self.fps))
             gray_origin = gray.copy()
             p0 = good_new.reshape(-1, 1, 2)
+
+    def FunctionPT(self):
+        img = cv2.imread(self.image_path)
+        dictionary = aruco.Dictionary_get(aruco.DICT_4X4_250)
+        parameters = aruco.DetectorParameters_create()
+
+        while(self.video.isOpened()):
+            ret, frame = self.video.read()
+            if ret != True:
+                break
+            
+            markerCorners, markerIds, rejectedCandidates = aruco.detectMarkers(frame, dictionary, parameters = parameters)
+            if np.size(markerIds) != 4:
+                continue
+
+            idx = np.squeeze(np.where(markerIds == 1))
+            pt1 = np.squeeze(markerCorners[idx[0]])[0]
+            idx = np.squeeze(np.where(markerIds == 2))
+            pt2 = np.squeeze(markerCorners[idx[0]])[1]
+            idx = np.squeeze(np.where(markerIds == 3))
+            pt3 = np.squeeze(markerCorners[idx[0]])[2]
+            idx = np.squeeze(np.where(markerIds == 4))
+            pt4 = np.squeeze(markerCorners[idx[0]])[3]
+
+            pts_src = np.array([
+                [0, 0],
+                [img.shape[1], 0],
+                [img.shape[1], 
+                img.shape[0]],
+                [0, img.shape[0]]
+            ])
+            
+            pts_dst = np.array([
+                [pt1[0], pt1[1]],
+                [pt2[0], pt2[1]],
+                [pt3[0], pt3[1]],
+                [pt4[0], pt4[1]]
+            ])
+
+            h, status = cv2.findHomography(pts_src, pts_dst)
+            temp = cv2.warpPerspective(img, h, (frame.shape[1], frame.shape[0]))
+            cv2.fillConvexPoly(frame, pts_dst.astype(int), 0, 16)
+            frame = frame + temp
+            cv2.imshow("video", frame)
+            cv2.waitKey(int(1000/self.fps))
         
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
