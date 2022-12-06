@@ -1,9 +1,12 @@
-import sys
+import sys, os
 import UI
 import cv2
+import glob
 import cv2.aruco as aruco
 import numpy as np
+from sklearn.decomposition import PCA
 from PyQt5 import QtWidgets
+from matplotlib import pyplot as plt
 
 
 class Window(QtWidgets.QWidget, UI.Ui_Form):
@@ -22,7 +25,6 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
     params.filterByInertia = True
     params.minInertiaRatio = 0.5
     
-
     def __init__(self):
         super(Window, self).__init__()
         self.setupUi(self)
@@ -35,6 +37,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.Preprocessing.clicked.connect(self.FunctionPreprocessing)
         self.VideoTracking.clicked.connect(self.FunctionVideoTracking)
         self.PT.clicked.connect(self.FunctionPT)
+        self.IR.clicked.connect(self.FunctionIR)
+        self.CTRE.clicked.connect(self.FunctionCTRE)
 
     def FunctionLoadVideo(self):
         path = QtWidgets.QFileDialog.getOpenFileName()
@@ -48,7 +52,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.label_image.setText("Image loaded")
 
     def FunctionLoadFolder(self):
-        print(3)
+        folder_path = QtWidgets.QFileDialog.getExistingDirectory()
+        self.folder = glob.glob(os.path.join(folder_path, "*.jpg")) + glob.glob(os.path.join(folder_path, "*.png"))
         self.label_folder.setText("Folder loaded")
 
     def FunctionBS(self):
@@ -90,7 +95,6 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
 
             detector = cv2.SimpleBlobDetector_create(self.params)
             keypoints = detector.detect(gray)
-            print(keypoints[1].pt)
 
             for kp in keypoints:
                 x, y = int(kp.pt[0]), int(kp.pt[1])
@@ -181,6 +185,63 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
             frame = frame + temp
             cv2.imshow("video", frame)
             cv2.waitKey(int(1000/self.fps))
+
+    def Reconstruction(self, img):
+        pca = PCA(n_components = 0.95)
+        r, g, b = cv2.split(img)
+        low_r = pca.fit_transform(r)
+        re_r = pca.inverse_transform(low_r)
+        low_g = pca.fit_transform(g)
+        re_g = pca.inverse_transform(low_g)
+        low_b = pca.fit_transform(b)
+        re_b = pca.inverse_transform(low_b)
+        clip_r = np.clip(re_r, a_min = 0, a_max = 255)
+        clip_g = np.clip(re_g, a_min = 0, a_max = 255)
+        clip_b = np.clip(re_b, a_min = 0, a_max = 255)
+        new_img = (cv2.merge([clip_r, clip_g, clip_b])).astype(np.uint8)
+        return new_img
+
+    def FunctionIR(self):
+        fig = plt.figure()
+        
+        # Image Reconstruction
+        for id, image_path in enumerate(self.folder):
+            img = cv2.imread(image_path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            if id < 15:
+                plt.subplot(4, 15, id + 1)
+                plt.axis('off')
+                plt.imshow(img)
+                plt.subplot(4, 15, id + 16)
+                plt.axis('off')
+                plt.imshow(self.Reconstruction(img))
+            else:
+                plt.subplot(4, 15, id + 16)
+                plt.axis('off')
+                plt.imshow(img)
+                plt.subplot(4, 15, id + 31)
+                plt.axis('off')
+                plt.imshow(self.Reconstruction(img))
+        fig.text(0.01, 0.78, "Origin")
+        fig.text(0.01, 0.58, "Reconstruction")
+        fig.text(0.01, 0.38, "Origin")
+        fig.text(0.01, 0.18, "Reconstruction")
+        plt.show()
+
+    def FunctionCTRE(self):
+        error_list = []
+        for image_path in self.folder:
+            img = cv2.imread(image_path)
+            img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            new_img = self.Reconstruction(img)
+            new_img_gray = cv2.cvtColor(new_img, cv2.COLOR_BGR2GRAY)
+
+            img_gray = cv2.normalize(img_gray, None, 0, 255, cv2.NORM_MINMAX)
+            new_img_gray = cv2.normalize(new_img_gray, None, 0, 255, cv2.NORM_MINMAX)
+            error = (np.sum((img_gray - new_img_gray)**2))**0.5
+            error_list.append(error)
+        print(error_list)
+
         
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
