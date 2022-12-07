@@ -7,8 +7,6 @@ name = "pypi"
 pyqt5 = "*"
 matplotlib = "*"
 tensorflow = "*"
-opencv-contrib-python = "==3.4.2.17"
-opencv-python = "==3.4.2.17"
 
 [dev-packages]
 
