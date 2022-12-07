@@ -1,11 +1,13 @@
 import sys
 import UI
 import keras
+import cv2
 import numpy as np
 import tensorflow as tf
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from PyQt5 import QtWidgets
+from PyQt5.QtGui import QPixmap
 from train import Resnet50
 
 
@@ -17,14 +19,27 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.setupUi(self)
 
         # button connect function
+        self.LoadImage.clicked.connect(self.FunctionLoadImage)
         self.ShowImages.clicked.connect(self.FunctionShowImages)
         self.SD.clicked.connect(self.FunctionSD)
         self.SMS.clicked.connect(self.FunctionSMS)
         self.SC.clicked.connect(self.FunctionSC)
+        self.Inference.clicked.connect(self.FunctionInference)
 
         # combo box
         self.Demo.addItem('Demo')
         self.Demo.addItem('Not Demo')
+
+    def FunctionLoadImage(self):
+        path = QtWidgets.QFileDialog.getOpenFileName()
+        self.image_path = path[0]
+        pix = QPixmap(self.image_path)
+        pix = pix.scaled(224,224)
+        item = QtWidgets.QGraphicsPixmapItem(pix)
+        scene = QtWidgets.QGraphicsScene(self)
+        scene.setSceneRect(0, 0, 230, 230)  
+        scene.addItem(item)
+        self.Image.setScene(scene)
 
     def FunctionShowImages(self):
         if self.Demo.currentText() == 'Not Demo':
@@ -118,9 +133,19 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
             plt.imshow(img)
             plt.axis("off")
             plt.show()
-        
 
-        
+    def FunctionInference(self):
+        model_focal = tf.keras.models.load_model('./model/model_focal.h5')
+        image = cv2.imread(self.image_path)
+        image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
+        image = image.reshape(1,224,224,3)
+        prediction = model_focal.predict(image)
+        if prediction[0][0] > 0.9:
+            self.Label.setText("Prediction: Dog")
+        else:
+            self.Label.setText("Prediction: Cat")
+
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
     ui = Window()
