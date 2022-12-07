@@ -5,9 +5,11 @@ import tensorflow as tf
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from PyQt5 import QtWidgets
+from train import Resnet50
 
 
 class Window(QtWidgets.QWidget, UI.Ui_Form):
+    model = Resnet50().model()
     
     def __init__(self):
         super(Window, self).__init__()
@@ -16,6 +18,7 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         # button connect function
         self.ShowImages.clicked.connect(self.FunctionShowImages)
         self.SD.clicked.connect(self.FunctionSD)
+        self.SMS.clicked.connect(self.FunctionSMS)
 
         # combo box
         self.Demo.addItem('Demo')
@@ -50,6 +53,9 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
                         cat = 1
                         count += 1
             plt.show()
+    
+    def FunctionSMS(self):
+        print(self.model.summary())
     
     def FunctionSD(self):
         if self.Demo.currentText() == 'Not Demo':
