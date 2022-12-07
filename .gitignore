@@ -3,3 +3,4 @@ __pycache__/
 *.h5
 HW4/Dataset_CvDl_Hw2
 HW5/Dataset_CvDl_Hw2_Q5
+HW5/inference_dataset
