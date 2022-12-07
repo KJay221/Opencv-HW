@@ -1,5 +1,6 @@
 import sys
 import UI
+import keras
 import numpy as np
 import tensorflow as tf
 import matplotlib.image as mpimg
@@ -19,6 +20,7 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
         self.ShowImages.clicked.connect(self.FunctionShowImages)
         self.SD.clicked.connect(self.FunctionSD)
         self.SMS.clicked.connect(self.FunctionSMS)
+        self.SC.clicked.connect(self.FunctionSC)
 
         # combo box
         self.Demo.addItem('Demo')
@@ -26,8 +28,8 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
 
     def FunctionShowImages(self):
         if self.Demo.currentText() == 'Not Demo':
-            self.training_dataset = tf.keras.utils.image_dataset_from_directory("./Dataset_CvDl_Hw2_Q5/training_dataset", labels = 'inferred', image_size=(224, 224), color_mode='rgb')
-            self.validation_dataset = tf.keras.utils.image_dataset_from_directory("./Dataset_CvDl_Hw2_Q5/validation_dataset", labels = 'inferred', image_size=(224, 224), color_mode='rgb')
+            training_dataset = tf.keras.utils.image_dataset_from_directory("./Dataset_CvDl_Hw2_Q5/training_dataset", labels = 'inferred', image_size=(224, 224), color_mode='rgb')
+            validation_dataset = tf.keras.utils.image_dataset_from_directory("./Dataset_CvDl_Hw2_Q5/validation_dataset", labels = 'inferred', image_size=(224, 224), color_mode='rgb')
         else:
             self.inference_dataset = tf.keras.utils.image_dataset_from_directory("./inference_dataset", labels = 'inferred', image_size=(224, 224), color_mode='rgb')
             plt.figure(figsize=(7,7))
@@ -53,9 +55,6 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
                         cat = 1
                         count += 1
             plt.show()
-    
-    def FunctionSMS(self):
-        print(self.model.summary())
     
     def FunctionSD(self):
         if self.Demo.currentText() == 'Not Demo':
@@ -87,6 +86,39 @@ class Window(QtWidgets.QWidget, UI.Ui_Form):
             plt.imshow(img)
             plt.axis("off")
             plt.show()
+
+    def FunctionSMS(self):
+        if self.Demo.currentText() == 'Not Demo':
+            training_dataset = tf.keras.utils.image_dataset_from_directory("./Dataset_CvDl_Hw2_Q5/training_dataset", labels = 'inferred', image_size=(224, 224), color_mode='rgb')
+            Resnet50().train(model=self.model, training_dataset=training_dataset)
+        else:
+            print(self.model.summary())
+
+    def FunctionSC(self):
+        if self.Demo.currentText() == 'Not Demo':
+            validation_dataset = tf.keras.utils.image_dataset_from_directory("./Dataset_CvDl_Hw2_Q5/validation_dataset", labels = 'inferred', image_size=(224, 224), color_mode='rgb')
+            model_focal = keras.models.load_model('./model/model_focal.h5')
+            result_focal = tf.keras.Model.evaluate(model_focal, validation_dataset)
+            model_binary = keras.models.load_model('./model/model_binary.h5')
+            result_binary = tf.keras.Model.evaluate(model_binary, validation_dataset)
+            y = [result_focal[1]*100, result_binary[1]*100]
+            plt.figure()
+            plot = plt.bar(["Focal Loss", "Binary Cross Entropy"], y)
+            plt.yticks(np.arange(0, 100, 10))
+            for value in plot:
+                height = value.get_height()
+                plt.text(value.get_x() + value.get_width()/2., 1.002*height,'%.3f' % height, ha='center', va='bottom')
+            plt.ylabel("Accuracy(%)")
+            plt.xlabel("Loss Function")
+            plt.title('Accuracy Comparison')
+            plt.savefig('./img/Accuracy_Comparison.png')
+            plt.show()
+        else:
+            img = mpimg.imread('./img/Accuracy_Comparison.png')
+            plt.imshow(img)
+            plt.axis("off")
+            plt.show()
+        
 
         
 if __name__ == '__main__':

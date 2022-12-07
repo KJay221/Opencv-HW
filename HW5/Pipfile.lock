@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "57705354ec396b61895ebf184cc4d430bd390cc851ce777223c4eb644b7ca2bc"
+            "sha256": "de4502e885f7540425b1ee2eebf2f39dd9f1aab891ad446014eabf2809298aef"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -737,6 +737,27 @@
             "index": "pypi",
             "version": "==2.11.0"
         },
+        "tensorflow-addons": {
+            "hashes": [
+                "sha256:0713a843a3cd5444bb1620cb7941566fb12f87cb2efb4150ca3eece7d80c75e7",
+                "sha256:0cc32b51e6fc480fee82b9db51f2b990da31a91c9adb01e799c92f47faf99e89",
+                "sha256:20c1b8e32f4fc93b095dfef8d86822ca25735bdaf55b9deea5f0723840879fae",
+                "sha256:27b0c7dba2d5d61f090ecb09144df8a2dd3d8984804fdcbfc6387c7af49ce8d6",
+                "sha256:45a14fad25447b5f5e2dd0bad83b206212ecf9ca33636d8bc150de70e833d32e",
+                "sha256:4985b7e8cf8b80574a8fca4d712a769c8a39c944ac91883f327d2a4c607d2853",
+                "sha256:69b4bf55d05e62d818f717577c6e4e62dd7d591d4f72dbe08ce79b78a2195cda",
+                "sha256:884988a682c317b7bb25742d65847b72fa8f684caded9726d948bd0618a2d42a",
+                "sha256:9284c6ab9b5f4caa25a536d7f3e8ffdea5464b5dab4925a2afc3c8a1f57492ea",
+                "sha256:9586dc70e4de67f234afc48a2bbae9a74dc6edf24d28f261bb320045b307f405",
+                "sha256:9ee3e5c81652f59502958396bc3c5fd34ee27d9a44ffbcc2dceb4fd61f4b4685",
+                "sha256:a2c833e0a0fb96b9851223a945b717dc431ce1af8cc44b2163d96d43afdd948a",
+                "sha256:c5efa7a6261679cb4f06d127933392293b2f29ad064db793e7a775c52286a186",
+                "sha256:ccc504b72342eb0e08c771644eed705e0a12937304141d6a8b19da5000f28a40",
+                "sha256:e74e2f47a7b8e2abb7fa0b48ea4837ea2636581c55f5559ecc804ec704d456bc"
+            ],
+            "index": "pypi",
+            "version": "==0.18.0"
+        },
         "tensorflow-estimator": {
             "hashes": [
                 "sha256:ea3b64acfff3d9a244f06178c9bdedcbdd3f125b67d0888dba8229498d06468b"
@@ -772,6 +793,14 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==2.1.1"
+        },
+        "typeguard": {
+            "hashes": [
+                "sha256:00edaa8da3a133674796cf5ea87d9f4b4c367d77476e185e80251cc13dfbb8c4",
+                "sha256:5e3e3be01e887e7eafae5af63d1f36c849aaa94e3a0112097312aabfa16284f1"
+            ],
+            "markers": "python_full_version >= '3.5.3'",
+            "version": "==2.13.3"
         },
         "typing-extensions": {
             "hashes": [
