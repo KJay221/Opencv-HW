@@ -1,5 +1,5 @@
 # Opencv Homework
-Computer vision and deep learning
+Computer vision and deep learning class homework
 
 將 UI 檔封裝成 python 檔
 ```
@@ -10,7 +10,7 @@ qt5 相關套件安裝
 $ sudo apt-get install pyqt5-dev-tools
 ```
 
-使用
+usage
 ```
 $ pipenv install
 $ pipenv shell
